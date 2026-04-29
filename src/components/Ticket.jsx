@@ -30,10 +30,7 @@ export default function Ticket({ ticket, service, onBack, onPrint, previewNumber
     <div className="flex flex-col items-center animate-fade-in py-8">
       <h2 className="text-sm font-semibold uppercase text-white/60 mb-8 tracking-widest">Chek Namunasi</h2>
 
-      <div
-        className="bg-white text-black p-6 rounded shadow-2xl flex flex-col items-center text-center font-mono"
-        style={{ width: "80mm" }}
-      >
+      <div className="w-[320px] bg-white text-black p-8 rounded shadow-2xl flex flex-col items-center text-center font-mono">
         <p className="text-[12px] font-black tracking-tight uppercase leading-none mb-1">Sherdor Medical</p>
         <p className="text-[9px] opacity-60 mb-5">Namangan viloyati, Jomashuy</p>
 
