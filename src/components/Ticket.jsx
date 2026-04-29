@@ -50,7 +50,7 @@ export default function Ticket({
   // Bitta chek komponenti
   const TicketCard = () => (
     <div
-      style={{ fontFamily: "'Courier New', Courier, monospace", width: "72mm" }}
+      style={{ fontFamily: "'Courier New', Courier, monospace", width: "70mm" }}
       className="bg-white text-black rounded overflow-hidden shadow-xl"
     >
       {/* Yuqori yirtish chizig'i */}
