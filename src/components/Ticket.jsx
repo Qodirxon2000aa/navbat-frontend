@@ -18,7 +18,6 @@ export default function Ticket({
     setIsPrinting(true);
     setPrintError("");
     setPrintInfo("");
-
     const result = await onPrint();
     if (result.ok) {
       setPrinted(true);
@@ -29,31 +28,112 @@ export default function Ticket({
     setIsPrinting(false);
   };
 
-  // Chek preview uchun ma'lumotlar
-  const sectionLabel = ticket?.section || previewSection || service?.section || "";
+  const sectionLabel = (ticket?.section || previewSection || service?.section || "").toUpperCase();
   const numLabel = ticket
     ? String(ticket.departmentNumber).padStart(3, "0")
     : previewNumber
       ? String(previewNumber).padStart(3, "0")
       : "---";
-  const queueCode = sectionLabel
-    ? `${sectionLabel.toUpperCase()}-${numLabel}`
-    : numLabel;
+  const queueCode = sectionLabel ? `${sectionLabel}-${numLabel}` : numLabel;
 
   const serviceName = ticket?.service || service?.name || "-";
   const price = Number(ticket?.price ?? service?.price ?? 0).toLocaleString("uz-UZ");
 
   const createdAt = ticket ? new Date(ticket.createdAt) : null;
   const dateStr = createdAt
-    ? createdAt.toLocaleDateString("uz-UZ", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric"
-      })
+    ? createdAt.toLocaleDateString("uz-UZ", { day: "2-digit", month: "2-digit", year: "numeric" })
     : "-";
   const timeStr = createdAt
     ? createdAt.toLocaleTimeString("uz-UZ", { hour: "2-digit", minute: "2-digit" })
     : "-";
+
+  // Bitta chek komponenti
+  const TicketCard = () => (
+    <div
+      style={{ fontFamily: "'Courier New', Courier, monospace" }}
+      className="w-[260px] bg-white text-black rounded overflow-hidden shadow-xl"
+    >
+      {/* Yuqori yirtish chizig'i */}
+      <div
+        style={{
+          height: "8px",
+          backgroundImage:
+            "repeating-linear-gradient(90deg, #ccc 0, #ccc 5px, #fff 5px, #fff 10px)"
+        }}
+      />
+
+      <div className="px-4 py-5 flex flex-col items-center text-center">
+        {/* Header */}
+        <p className="text-[13px] font-black tracking-wide uppercase leading-tight m-0">
+          SHERDOR MEDICAL
+        </p>
+        <p className="text-[9px] text-black/50 m-0 mt-0.5">Navbat tizimi</p>
+        <p className="text-[9px] text-black/50 m-0">Namangan, Jomashuy</p>
+
+        <div className="w-full border-t border-dashed border-black/20 my-3" />
+
+        {/* Navbat raqami — katta */}
+        <p className="text-[9px] tracking-[0.15em] text-black/40 m-0 uppercase">
+          Navbat raqami
+        </p>
+        <p
+          className="m-0 font-black leading-none tracking-tight"
+          style={{ fontSize: "56px", marginTop: "6px", marginBottom: "4px" }}
+        >
+          {queueCode}
+        </p>
+
+        {!ticket && (
+          <p className="text-[9px] text-black/40 mt-1 mb-0 px-2">
+            Raqam chek chiqarilganda band qilinadi
+          </p>
+        )}
+
+        <div className="w-full border-t border-dashed border-black/20 my-3" />
+
+        {/* Ma'lumotlar */}
+        <table className="w-full text-[10px] border-collapse">
+          <tbody>
+            <tr>
+              <td className="text-left text-black/40 py-[3px] pr-2">Bo'lim</td>
+              <td className="text-right font-bold py-[3px] uppercase">{serviceName}</td>
+            </tr>
+            <tr>
+              <td className="text-left text-black/40 py-[3px] pr-2">Xizmat</td>
+              <td className="text-right font-bold py-[3px]">Ko'rik</td>
+            </tr>
+            <tr>
+              <td className="text-left text-black/40 py-[3px] pr-2">Sana</td>
+              <td className="text-right py-[3px]">{dateStr}</td>
+            </tr>
+            <tr>
+              <td className="text-left text-black/40 py-[3px] pr-2">Vaqt</td>
+              <td className="text-right py-[3px]">{timeStr}</td>
+            </tr>
+            <tr style={{ borderTop: "1px dashed rgba(0,0,0,0.12)" }}>
+              <td className="text-left font-bold text-black/80 pt-2 pb-1 pr-2">To'lov</td>
+              <td className="text-right font-black pt-2 pb-1">{price} so'm</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div className="w-full border-t border-dashed border-black/20 my-3" />
+
+        {/* Footer */}
+        <p className="text-[9px] text-black/40 m-0">Navbatingizni kuting!</p>
+        <p className="text-[9px] text-black/40 m-0 mt-0.5">Rahmat :)</p>
+      </div>
+
+      {/* Pastki yirtish chizig'i */}
+      <div
+        style={{
+          height: "8px",
+          backgroundImage:
+            "repeating-linear-gradient(90deg, #ccc 0, #ccc 5px, #fff 5px, #fff 10px)"
+        }}
+      />
+    </div>
+  );
 
   return (
     <div className="flex flex-col items-center animate-fade-in py-8">
@@ -61,94 +141,14 @@ export default function Ticket({
         Chek Namunasi
       </h2>
 
-      {/* ── Termal chek preview ── */}
-      <div
-        style={{ fontFamily: "'Courier New', Courier, monospace" }}
-        className="w-[300px] bg-white text-black rounded shadow-2xl overflow-hidden"
-      >
-        {/* Yirtish chizig'i yuqorida */}
-        <div
-          style={{
-            backgroundImage:
-              "repeating-linear-gradient(90deg,#000 0,#000 6px,transparent 6px,transparent 12px)",
-            height: "6px",
-            opacity: 0.15
-          }}
-        />
-
-        <div className="px-5 py-5 flex flex-col items-center text-center">
-          {/* Header */}
-          <p className="text-[13px] font-black tracking-tight uppercase leading-tight">
-            SHERDOR MEDICAL
-          </p>
-          <p className="text-[9px] text-black/50 leading-snug mt-0.5">Navbat tizimi</p>
-          <p className="text-[9px] text-black/50 leading-snug">Namangan, Jomashuy</p>
-
-          <div className="w-full border-t border-dashed border-black/20 my-3" />
-
-          {/* Navbat raqami */}
-          <p className="text-[9px] uppercase tracking-widest text-black/40 mb-1">
-            * NAVBAT RAQAMI *
-          </p>
-          <p className="text-5xl font-black tracking-tight leading-none my-2">
-            {queueCode}
-          </p>
-          {!ticket && (
-            <p className="text-[9px] text-black/40 mt-1 px-2">
-              Navbat raqami chek chiqarilganda band qilinadi
-            </p>
-          )}
-
-          <div className="w-full border-t border-dashed border-black/20 my-3" />
-
-          {/* Ma'lumotlar jadvali */}
-          <table className="w-full text-[10px]">
-            <tbody>
-              <tr className="border-b border-black/5">
-                <td className="text-left text-black/40 py-1 pr-2">Bo'lim</td>
-                <td className="text-right font-bold py-1 uppercase">{serviceName}</td>
-              </tr>
-              <tr className="border-b border-black/5">
-                <td className="text-left text-black/40 py-1 pr-2">Xizmat</td>
-                <td className="text-right font-bold py-1">Ko'rik</td>
-              </tr>
-              <tr className="border-b border-black/5">
-                <td className="text-left text-black/40 py-1 pr-2">Sana</td>
-                <td className="text-right py-1">{dateStr}</td>
-              </tr>
-              <tr className="border-b border-black/5">
-                <td className="text-left text-black/40 py-1 pr-2">Vaqt</td>
-                <td className="text-right py-1">{timeStr}</td>
-              </tr>
-              <tr>
-                <td className="text-left text-black/40 pt-2 pb-1 pr-2 font-bold">
-                  To'lov
-                </td>
-                <td className="text-right pt-2 pb-1 font-black">{price} so'm</td>
-              </tr>
-            </tbody>
-          </table>
-
-          <div className="w-full border-t border-dashed border-black/20 my-3" />
-
-          {/* Footer */}
-          <p className="text-[9px] text-black/50">Navbatingizni kuting!</p>
-          <p className="text-[9px] text-black/50">Rahmat :)</p>
-        </div>
-
-        {/* Yirtish chizig'i pastda */}
-        <div
-          style={{
-            backgroundImage:
-              "repeating-linear-gradient(90deg,#000 0,#000 6px,transparent 6px,transparent 12px)",
-            height: "6px",
-            opacity: 0.15
-          }}
-        />
+      {/* Ikki chek yon-yon, markazda */}
+      <div className="flex gap-6 justify-center flex-wrap">
+        <TicketCard />
+        <TicketCard />
       </div>
 
-      {/* ── Tugmalar ── */}
-      <div className="mt-8 flex gap-3">
+      {/* Tugmalar */}
+      <div className="mt-10 flex gap-3">
         <button
           onClick={onBack}
           className="px-6 py-3 border border-white/10 text-white/60 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-white/5 transition-all"
