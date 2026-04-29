@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import ServiceList from "./components/ServiceList";
 import Ticket from "./components/Ticket";
 
-const API_URL = import.meta.env.VITE_API_URL || "https://xmaster.nodirkhanov.uz/api";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001/api";
 
 export default function App() {
   const [view, setView] = useState("selection");
