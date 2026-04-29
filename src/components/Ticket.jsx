@@ -141,9 +141,8 @@ export default function Ticket({
         Chek Namunasi
       </h2>
 
-      {/* Ikki chek yon-yon, markazda */}
-      <div className="flex gap-6 justify-center flex-wrap">
-        <TicketCard />
+      {/* Bitta chek, markazda */}
+      <div className="flex justify-center">
         <TicketCard />
       </div>
 
