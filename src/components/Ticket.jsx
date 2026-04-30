@@ -100,7 +100,7 @@ export default function Ticket({
         </p>
         <p
           className="m-0 font-black leading-none tracking-tight"
-          style={{ fontSize: "80px", marginTop: "6px", marginBottom: "4px" }}
+          style={{ fontSize: "77px", marginTop: "6px", marginBottom: "4px" }}
         >
           {queueCode}
         </p>
