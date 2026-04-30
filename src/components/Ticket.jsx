@@ -177,14 +177,14 @@ export default function Ticket({
           onClick={onBack}
           className="px-6 py-3 border border-white/10 text-white/60 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-white/5 transition-all"
         >
-          Yangi navbat
+          Orqaga
         </button>
         <button
           onClick={handlePrint}
           disabled={isPrinting || printed}
           className="px-6 py-3 bg-teal-500 text-black rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-teal-400 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          {isPrinting ? "Yuborilmoqda..." : printed ? "Yuborildi ✓" : "Chekni chiqarish"}
+          {isPrinting ? "Yuborilmoqda..." : printed ? "Yuborildi ✓" : "Navbat olish"}
         </button>
       </div>
 
