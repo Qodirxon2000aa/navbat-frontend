@@ -36,7 +36,6 @@ export default function Ticket({
       : "---";
   const queueCode = sectionLabel ? `${sectionLabel}-${numLabel}` : numLabel;
 
-  const serviceName = ticket?.service || service?.name || "-";
   const price = Number(ticket?.price ?? service?.price ?? 0).toLocaleString("uz-UZ");
 
   const doctorFirst = ticket?.doctorFirstName ?? service?.doctorFirstName ?? "";
@@ -127,10 +126,6 @@ export default function Ticket({
             <tr>
               <td className="text-left text-black/40 py-[3px] pr-2">Bo'lim</td>
               <td className="text-right font-bold py-[3px] uppercase">{sectionLabel || "—"}</td>
-            </tr>
-            <tr>
-              <td className="text-left text-black/40 py-[3px] pr-2">Xizmat</td>
-              <td className="text-right font-bold py-[3px]">{serviceName}</td>
             </tr>
             <tr>
               <td className="text-left text-black/40 py-[3px] pr-2">Sana</td>
