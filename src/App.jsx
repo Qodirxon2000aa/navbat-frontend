@@ -127,13 +127,15 @@ export default function App() {
     <div className="min-h-screen bg-[#0A0A0B] text-white font-sans flex flex-col">
       <nav className="border-b border-white/10 px-8 py-6 flex justify-between items-center sticky top-0 z-50 bg-[#0A0A0B]/80 backdrop-blur-md">
         <div>
-          <h1 className="text-xl font-bold tracking-tight uppercase">Sherdor Medical</h1>
-          <p className="text-[10px] text-white/40 uppercase tracking-[0.2em]">Navbat Boshqaruv Tizimi</p>
+          <h1 className="text-3xl md:text-4xl font-black tracking-tight uppercase leading-none">Sherdor Medical</h1>
+          <p className="mt-2 text-xs md:text-sm text-white/70 font-bold uppercase tracking-[0.18em]">
+            Navbat Boshqaruv Tizimi
+          </p>
         </div>
 
         <button
           onClick={() => setView("selection")}
-          className="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all bg-teal-500 text-black"
+          className="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all bg-teal-500 text-black"
         >
           Navbat olish
         </button>
