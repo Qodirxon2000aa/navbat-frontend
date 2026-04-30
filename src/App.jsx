@@ -7,20 +7,55 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001/api";
 export default function App() {
   const [view, setView] = useState("selection");
   const [services, setServices] = useState([]);
+  const [queueSnapshot, setQueueSnapshot] = useState([]);
   const [currentTicket, setCurrentTicket] = useState(null);
   const [selectedServiceId, setSelectedServiceId] = useState("");
   const [previewNumber, setPreviewNumber] = useState(null);
   const [previewSection, setPreviewSection] = useState("");
 
   const fetchServices = async () => {
-    const response = await fetch(`${API_URL}/services`);
-    const data = await response.json();
-    setServices(data);
+    try {
+      const response = await fetch(`${API_URL}/services`, { cache: "no-store" });
+      if (!response.ok) return;
+      const data = await response.json();
+      setServices(Array.isArray(data) ? data : []);
+    } catch (_error) {
+      // Ignore service refresh errors in client view.
+    }
+  };
+
+  const fetchQueueSnapshot = async () => {
+    try {
+      const response = await fetch(`${API_URL}/queues`, { cache: "no-store" });
+      if (!response.ok) return;
+      const data = await response.json();
+      setQueueSnapshot(Array.isArray(data?.queues) ? data.queues : []);
+    } catch (_error) {
+      // Ignore queue snapshot errors in client view.
+    }
   };
 
   useEffect(() => {
     fetchServices();
+    fetchQueueSnapshot();
+    const interval = setInterval(() => {
+      fetchServices();
+      fetchQueueSnapshot();
+    }, 1000);
+    return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    if (!selectedServiceId) return;
+    const selectedStillExists = services.some((item) => item.id === selectedServiceId);
+    if (!selectedStillExists) {
+      setSelectedServiceId("");
+      setCurrentTicket(null);
+      setPreviewNumber(null);
+      setPreviewSection("");
+      setView("selection");
+    }
+  }, [services, selectedServiceId]);
 
   const handleSelectService = async (serviceId) => {
     setSelectedServiceId(serviceId);
@@ -77,6 +112,11 @@ export default function App() {
       setCurrentTicket(ticketToPrint);
       setPreviewNumber(ticketToPrint.departmentNumber + 1);
       setPreviewSection(ticketToPrint.section);
+      setSelectedServiceId("");
+      setCurrentTicket(null);
+      setView("selection");
+      fetchServices();
+      fetchQueueSnapshot();
       return { ok: true, message: data?.message, ticket: ticketToPrint };
     } catch (_error) {
       return { ok: false, message: "Printerga ulanishda xatolik" };
@@ -100,7 +140,13 @@ export default function App() {
       </nav>
 
       <main className="flex-1 max-w-6xl mx-auto w-full p-8">
-        {view === "selection" && <ServiceList services={services} onSelect={handleSelectService} />}
+        {view === "selection" && (
+          <ServiceList
+            services={services}
+            queueSnapshot={queueSnapshot}
+            onSelect={handleSelectService}
+          />
+        )}
         {view === "ticket" && currentTicket && (
           <Ticket
             ticket={currentTicket}

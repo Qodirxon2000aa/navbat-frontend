@@ -16,9 +16,16 @@ export default function QueueMonitor({ queues, onCallNext, onReset }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {queues.map((item) => (
           <div key={item.serviceId} className="bg-white/5 border border-white/10 rounded-2xl p-6">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-4 gap-2">
               <h3 className="text-lg font-bold">{item.service}</h3>
-              <span className="text-xs px-2 py-1 rounded bg-teal-500/10 text-teal-300">Bo'lim {item.section}</span>
+              <div className="text-right shrink-0 space-y-1">
+                <span className="block text-xs px-2 py-1 rounded bg-teal-500/10 text-teal-300">
+                  Bo'lim {item.section}
+                </span>
+                {item.roomNumber ? (
+                  <span className="block text-[11px] text-white/60">Xona {item.roomNumber}</span>
+                ) : null}
+              </div>
             </div>
 
             <div className="text-sm text-white/70 space-y-2 mb-5">

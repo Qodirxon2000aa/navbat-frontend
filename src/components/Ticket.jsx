@@ -39,6 +39,12 @@ export default function Ticket({
   const serviceName = ticket?.service || service?.name || "-";
   const price = Number(ticket?.price ?? service?.price ?? 0).toLocaleString("uz-UZ");
 
+  const doctorFirst = ticket?.doctorFirstName ?? service?.doctorFirstName ?? "";
+  const doctorLast = ticket?.doctorLastName ?? service?.doctorLastName ?? "";
+  const doctorFull = [doctorFirst, doctorLast].filter(Boolean).join(" ").trim();
+  const doctorPhone = ticket?.doctorPhone ?? service?.doctorPhone ?? "";
+  const roomNumber = (ticket?.roomNumber ?? service?.roomNumber ?? "").trim();
+
   const createdAt = ticket ? new Date(ticket.createdAt) : null;
   const dateStr = createdAt
     ? createdAt.toLocaleDateString("uz-UZ", { day: "2-digit", month: "2-digit", year: "numeric" })
@@ -72,13 +78,29 @@ export default function Ticket({
 
         <div className="w-full border-t border-dashed border-black/20 my-3" />
 
+        {(doctorFull || doctorPhone) && (
+          <div className="w-full flex flex-col items-center gap-1 mb-1">
+            <p className="text-[9px] tracking-[0.12em] text-black/40 m-0 uppercase">Shifokor</p>
+            {doctorFull ? (
+              <p className="text-[11px] font-bold text-black m-0 leading-tight">{doctorFull}</p>
+            ) : null}
+            {doctorPhone ? (
+              <p className="text-[10px] font-mono text-black/70 m-0">{doctorPhone}</p>
+            ) : null}
+          </div>
+        )}
+
+        {(doctorFull || doctorPhone) && (
+          <div className="w-full border-t border-dashed border-black/20 my-3" />
+        )}
+
         {/* Navbat raqami — katta */}
         <p className="text-[9px] tracking-[0.15em] text-black/40 m-0 uppercase">
           Navbat raqami
         </p>
         <p
           className="m-0 font-black leading-none tracking-tight"
-          style={{ fontSize: "56px", marginTop: "6px", marginBottom: "4px" }}
+          style={{ fontSize: "80px", marginTop: "6px", marginBottom: "4px" }}
         >
           {queueCode}
         </p>
@@ -96,12 +118,18 @@ export default function Ticket({
           <tbody>
             <tr>
               <td className="text-left text-black/40 py-[3px] pr-2">Bo'lim</td>
-              <td className="text-right font-bold py-[3px] uppercase">{serviceName}</td>
+              <td className="text-right font-bold py-[3px] uppercase">{sectionLabel || "—"}</td>
             </tr>
             <tr>
               <td className="text-left text-black/40 py-[3px] pr-2">Xizmat</td>
-              <td className="text-right font-bold py-[3px]">Ko'rik</td>
+              <td className="text-right font-bold py-[3px]">{serviceName}</td>
             </tr>
+            {roomNumber ? (
+              <tr>
+                <td className="text-left text-black/40 py-[3px] pr-2">Xona</td>
+                <td className="text-right font-bold py-[3px]">{roomNumber}</td>
+              </tr>
+            ) : null}
             <tr>
               <td className="text-left text-black/40 py-[3px] pr-2">Sana</td>
               <td className="text-right py-[3px]">{dateStr}</td>
