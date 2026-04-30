@@ -104,6 +104,14 @@ export default function Ticket({
         >
           {queueCode}
         </p>
+        {roomNumber ? (
+          <p
+            className="m-0 font-black leading-none tracking-tight text-black/85"
+            style={{ fontSize: "38px", marginTop: "2px", marginBottom: "6px" }}
+          >
+            Xona {roomNumber}
+          </p>
+        ) : null}
 
         {!ticket && (
           <p className="text-[9px] text-black/40 mt-1 mb-0 px-2">
@@ -124,12 +132,6 @@ export default function Ticket({
               <td className="text-left text-black/40 py-[3px] pr-2">Xizmat</td>
               <td className="text-right font-bold py-[3px]">{serviceName}</td>
             </tr>
-            {roomNumber ? (
-              <tr>
-                <td className="text-left text-black/40 py-[3px] pr-2">Xona</td>
-                <td className="text-right font-bold py-[3px]">{roomNumber}</td>
-              </tr>
-            ) : null}
             <tr>
               <td className="text-left text-black/40 py-[3px] pr-2">Sana</td>
               <td className="text-right py-[3px]">{dateStr}</td>
