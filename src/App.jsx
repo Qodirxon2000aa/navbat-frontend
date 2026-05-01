@@ -38,11 +38,17 @@ export default function App() {
   useEffect(() => {
     fetchServices();
     fetchQueueSnapshot();
-    const interval = setInterval(() => {
+    const events = new EventSource(`${API_URL}/events`);
+    events.addEventListener("state-updated", () => {
       fetchServices();
       fetchQueueSnapshot();
-    }, 1000);
-    return () => clearInterval(interval);
+    });
+    events.onerror = () => {
+      // Keep a light fallback refresh when SSE is temporarily unavailable.
+      fetchServices();
+      fetchQueueSnapshot();
+    };
+    return () => events.close();
   }, []);
 
   useEffect(() => {
