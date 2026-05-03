@@ -38,11 +38,12 @@ export default function ServiceList({ services, queueSnapshot = [], onSelect }) 
             ? `${service.section}-${String(queueInfo.current.departmentNumber).padStart(3, "0")}`
             : `${service.section}-${String(lastNumber).padStart(3, "0")}`;
           const latestIssuedCode = `${service.section}-${String(lastNumber).padStart(3, "0")}`;
+
           return (
             <div
               key={service.id}
               onClick={() => handleSelect(service)}
-              className={`relative flex flex-col md:flex-row gap-4 p-4 rounded-2xl border transition-all cursor-pointer group overflow-hidden ${
+              className={`relative flex flex-col md:flex-row gap-4 p-4 rounded-2xl border transition-all overflow-hidden cursor-pointer group ${
                 selectedId === service.id
                   ? "bg-teal-500/10 border-teal-500 shadow-lg shadow-teal-500/10"
                   : "bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20"

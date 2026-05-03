@@ -163,7 +163,7 @@ export default function Ticket({
   return (
     <div className="flex flex-col items-center animate-fade-in py-8">
       <h2 className="text-sm font-semibold uppercase text-white/60 mb-8 tracking-widest">
-        Chek Namunasi
+        {ticket ? "Sizning chekingiz" : "Chek namunasi"}
       </h2>
 
       {/* Bitta chek, markazda */}

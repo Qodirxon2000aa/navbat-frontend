@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { getNavbatApiBase } from "./apiBase.js";
 import ServiceList from "./components/ServiceList";
 import Ticket from "./components/Ticket";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001/api";
+const API_URL = getNavbatApiBase();
 
 export default function App() {
   const [view, setView] = useState("selection");
@@ -20,7 +21,7 @@ export default function App() {
       const data = await response.json();
       setServices(Array.isArray(data) ? data : []);
     } catch (_error) {
-      // Ignore service refresh errors in client view.
+      /* ignore */
     }
   };
 
@@ -31,7 +32,7 @@ export default function App() {
       const data = await response.json();
       setQueueSnapshot(Array.isArray(data?.queues) ? data.queues : []);
     } catch (_error) {
-      // Ignore queue snapshot errors in client view.
+      /* ignore */
     }
   };
 
@@ -44,7 +45,6 @@ export default function App() {
       fetchQueueSnapshot();
     });
     events.onerror = () => {
-      // Keep a light fallback refresh when SSE is temporarily unavailable.
       fetchServices();
       fetchQueueSnapshot();
     };
@@ -63,67 +63,124 @@ export default function App() {
     }
   }, [services, selectedServiceId]);
 
-  const handleSelectService = async (serviceId) => {
-    setSelectedServiceId(serviceId);
-    setCurrentTicket(null);
-    setPreviewNumber(null);
-    setPreviewSection("");
-
-    try {
-      const response = await fetch(`${API_URL}/services/${serviceId}/next-number`);
-      if (response.ok) {
-        const data = await response.json();
-        setPreviewNumber(data.nextDepartmentNumber);
-        setPreviewSection(data.section);
+  const issueTicketAndPrint = useCallback(async (serviceId) => {
+    const ticketRes = await fetch(`${API_URL}/tickets`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ serviceId })
+    });
+    if (!ticketRes.ok) {
+      let msg = "Navbat band qilishda xatolik";
+      try {
+        const err = await ticketRes.json();
+        if (err?.message) msg = err.message;
+      } catch {
+        /* ignore */
       }
-    } catch (_error) {
-      // Ignore preview errors, print flow still works.
+      return { ok: false, message: msg, ticket: null };
+    }
+    const ticket = await ticketRes.json();
+
+    const printRes = await fetch(`${API_URL}/printer/print-ticket`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ticket })
+    });
+    let printData = {};
+    try {
+      printData = await printRes.json();
+    } catch {
+      /* ignore */
+    }
+    if (!printRes.ok) {
+      return {
+        ok: false,
+        message: printData?.message || "Printer xatoligi",
+        ticket
+      };
     }
 
+    return {
+      ok: true,
+      message: printData?.message || "Chek chop etildi",
+      ticket
+    };
+  }, []);
+
+  /** Xizmat tanlash → namuna ekrani (navbat shu yerda band qilinmaydi) */
+  const handleSelectService = (serviceId) => {
+    setSelectedServiceId(serviceId);
+    setCurrentTicket(null);
+
+    const svc = services.find((s) => s.id === serviceId);
+    const row = queueSnapshot.find((q) => q.serviceId === serviceId);
+    const guessNext = row?.lastNumber != null ? Number(row.lastNumber) + 1 : null;
+    setPreviewSection(svc?.section || "");
+    setPreviewNumber(guessNext);
     setView("ticket");
+
+    void (async () => {
+      try {
+        const response = await fetch(`${API_URL}/services/${serviceId}/next-number`, {
+          cache: "no-store"
+        });
+        if (!response.ok) return;
+        const data = await response.json();
+        setPreviewNumber(data.nextDepartmentNumber);
+        if (data.section) setPreviewSection(data.section);
+      } catch {
+        /* ignore */
+      }
+    })();
   };
 
   const handlePrintTicket = async () => {
+    if (!selectedServiceId && !currentTicket) {
+      return { ok: false, message: "Avval xizmat tanlang" };
+    }
+
     try {
       let ticketToPrint = currentTicket;
+      let printMessage = "";
 
-      if (!ticketToPrint) {
-        if (!selectedServiceId) {
-          return { ok: false, message: "Avval xizmat tanlang" };
-        }
-
-        const ticketResponse = await fetch(`${API_URL}/tickets`, {
+      if (ticketToPrint) {
+        const response = await fetch(`${API_URL}/printer/print-ticket`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ serviceId: selectedServiceId })
+          body: JSON.stringify({ ticket: ticketToPrint })
         });
-
-        if (!ticketResponse.ok) {
-          return { ok: false, message: "Navbat band qilishda xatolik" };
+        let data = {};
+        try {
+          data = await response.json();
+        } catch {
+          /* ignore */
         }
-
-        ticketToPrint = await ticketResponse.json();
+        if (!response.ok) {
+          return { ok: false, message: data?.message || "Printer xatoligi" };
+        }
+        printMessage = data?.message || "";
+      } else {
+        const result = await issueTicketAndPrint(selectedServiceId);
+        if (!result.ok) {
+          if (result.ticket) setCurrentTicket(result.ticket);
+          return {
+            ok: false,
+            message: result.message,
+            ticket: result.ticket
+          };
+        }
+        ticketToPrint = result.ticket;
+        printMessage = result.message || "";
       }
 
-      const response = await fetch(`${API_URL}/printer/print-ticket`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ticket: ticketToPrint })
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        return { ok: false, message: data?.message || "Printer xatoligi" };
-      }
-
-      setCurrentTicket(ticketToPrint);
-      setPreviewNumber(ticketToPrint.departmentNumber + 1);
-      setPreviewSection(ticketToPrint.section);
+      setPreviewNumber(Number(ticketToPrint.departmentNumber ?? 0) + 1);
+      setPreviewSection(ticketToPrint.section || "");
       setSelectedServiceId("");
       setCurrentTicket(null);
       setView("selection");
       fetchServices();
       fetchQueueSnapshot();
-      return { ok: true, message: data?.message, ticket: ticketToPrint };
+      return { ok: true, message: printMessage, ticket: ticketToPrint };
     } catch (_error) {
       return { ok: false, message: "Printerga ulanishda xatolik" };
     }
@@ -140,10 +197,13 @@ export default function App() {
         </div>
 
         <button
-          onClick={() => setView("selection")}
+          type="button"
+          onClick={() => {
+            setView("selection");
+          }}
           className="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all bg-teal-500 text-black"
         >
-          Navbat olish
+          Xizmatlar
         </button>
       </nav>
 
