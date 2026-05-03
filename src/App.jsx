@@ -63,7 +63,8 @@ export default function App() {
     }
   }, [services, selectedServiceId]);
 
-  const issueTicketAndPrint = useCallback(async (serviceId) => {
+  /** Faqat navbat yaratish — chop etish alohida, fonda */
+  const postTicket = useCallback(async (serviceId) => {
     const ticketRes = await fetch(`${API_URL}/tickets`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -80,31 +81,17 @@ export default function App() {
       return { ok: false, message: msg, ticket: null };
     }
     const ticket = await ticketRes.json();
+    return { ok: true, ticket };
+  }, []);
 
-    const printRes = await fetch(`${API_URL}/printer/print-ticket`, {
+  const printTicketInBackground = useCallback((ticket) => {
+    void fetch(`${API_URL}/printer/print-ticket`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ticket })
+    }).catch(() => {
+      /* printer kechikishi/xatosi — navbat allaqachon berilgan */
     });
-    let printData = {};
-    try {
-      printData = await printRes.json();
-    } catch {
-      /* ignore */
-    }
-    if (!printRes.ok) {
-      return {
-        ok: false,
-        message: printData?.message || "Printer xatoligi",
-        ticket
-      };
-    }
-
-    return {
-      ok: true,
-      message: printData?.message || "Chek chop etildi",
-      ticket
-    };
   }, []);
 
   /** Xizmat tanlash → namuna ekrani (navbat shu yerda band qilinmaydi) */
@@ -141,36 +128,16 @@ export default function App() {
 
     try {
       let ticketToPrint = currentTicket;
-      let printMessage = "";
 
-      if (ticketToPrint) {
-        const response = await fetch(`${API_URL}/printer/print-ticket`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ticket: ticketToPrint })
-        });
-        let data = {};
-        try {
-          data = await response.json();
-        } catch {
-          /* ignore */
-        }
-        if (!response.ok) {
-          return { ok: false, message: data?.message || "Printer xatoligi" };
-        }
-        printMessage = data?.message || "";
-      } else {
-        const result = await issueTicketAndPrint(selectedServiceId);
+      if (!ticketToPrint) {
+        const result = await postTicket(selectedServiceId);
         if (!result.ok) {
-          if (result.ticket) setCurrentTicket(result.ticket);
-          return {
-            ok: false,
-            message: result.message,
-            ticket: result.ticket
-          };
+          return { ok: false, message: result.message, ticket: null };
         }
         ticketToPrint = result.ticket;
-        printMessage = result.message || "";
+        printTicketInBackground(ticketToPrint);
+      } else {
+        printTicketInBackground(ticketToPrint);
       }
 
       setPreviewNumber(Number(ticketToPrint.departmentNumber ?? 0) + 1);
@@ -180,9 +147,13 @@ export default function App() {
       setView("selection");
       fetchServices();
       fetchQueueSnapshot();
-      return { ok: true, message: printMessage, ticket: ticketToPrint };
+      return {
+        ok: true,
+        message: "Navbat olindi",
+        ticket: ticketToPrint
+      };
     } catch (_error) {
-      return { ok: false, message: "Printerga ulanishda xatolik" };
+      return { ok: false, message: "Navbat olishda xatolik" };
     }
   };
 

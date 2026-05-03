@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 export default function Ticket({
   ticket,
@@ -8,6 +8,14 @@ export default function Ticket({
   previewNumber,
   previewSection
 }) {
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
   const [isPrinting, setIsPrinting] = useState(false);
   const [printed, setPrinted] = useState(false);
   const [printError, setPrintError] = useState("");
@@ -19,11 +27,12 @@ export default function Ticket({
     setPrintError("");
     setPrintInfo("");
     const result = await onPrint();
+    if (!mountedRef.current) return;
     if (result.ok) {
       setPrinted(true);
-      setPrintInfo(result.message || "Chek printerga yuborildi");
+      setPrintInfo(result.message || "Navbat olindi");
     } else {
-      setPrintError(result.message || "Print xatoligi");
+      setPrintError(result.message || "Xatolik");
     }
     setIsPrinting(false);
   };
