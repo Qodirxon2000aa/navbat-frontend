@@ -25,17 +25,17 @@ export default function TouchKeyboard({ mode, onKey }) {
 
   return (
     <div
-      className="fixed bottom-0 left-0 right-0 z-[200] border-t border-white/10 bg-[#050508]/95 backdrop-blur-md pb-[max(8px,env(safe-area-inset-bottom))] shadow-[0_-12px_40px_rgba(0,0,0,0.55)]"
+      className="touch-keyboard-root fixed bottom-0 left-0 right-0 z-[200] border-t border-white/10 bg-[#050508]/97 backdrop-blur-md pb-[max(10px,env(safe-area-inset-bottom))] shadow-[0_-16px_48px_rgba(0,0,0,0.6)]"
       onMouseDown={(e) => e.preventDefault()}
     >
-      <p className="text-center text-[10px] font-bold uppercase tracking-[0.2em] text-white/35 py-1.5 m-0">
+      <p className="text-center text-[clamp(0.65rem,1.6vw,0.85rem)] font-bold uppercase tracking-[0.22em] text-white/40 py-2 m-0">
         {mode === "numeric" ? "Raqamlar" : "Klaviatura"}
       </p>
-      <div className="mx-auto w-full max-w-[min(100vw,960px)] px-2 pb-2 flex flex-col gap-1.5">
+      <div className="mx-auto w-full max-w-[min(100vw,1200px)] px-3 sm:px-5 pb-3 flex flex-col gap-2 sm:gap-2.5">
         {layout.map((row, ri) => (
           <div
             key={ri}
-            className="grid gap-1.5 w-full"
+            className="grid gap-2 sm:gap-2.5 w-full"
             style={{
               gridTemplateColumns: row.columns || `repeat(${row.keys.length}, minmax(0, 1fr))`
             }}

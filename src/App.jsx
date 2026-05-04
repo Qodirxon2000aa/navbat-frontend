@@ -185,12 +185,34 @@ export default function App() {
     setPreviewSection("");
   };
 
+  const isRegistering = !patient;
+
   return (
-    <div className="min-h-screen bg-[#0A0A0B] text-white font-sans flex flex-col">
-      <nav className="border-b border-white/10 px-8 py-6 flex justify-between items-center sticky top-0 z-50 bg-[#0A0A0B]/80 backdrop-blur-md gap-4 flex-wrap">
+    <div
+      className={`bg-[#0A0A0B] text-white font-sans flex flex-col ${
+        isRegistering ? "min-h-[100dvh] h-[100dvh] overflow-hidden" : "min-h-screen"
+      }`}
+    >
+      <nav
+        className={`border-b border-white/10 flex justify-between items-center z-50 bg-[#0A0A0B]/90 backdrop-blur-md gap-4 flex-wrap shrink-0 ${
+          isRegistering ? "px-5 py-5 sm:px-8 sm:py-7 sticky top-0" : "px-8 py-6 sticky top-0"
+        }`}
+      >
         <div>
-          <h1 className="text-3xl md:text-4xl font-black tracking-tight uppercase leading-none">Sherdor Medical</h1>
-          <p className="mt-2 text-xs md:text-sm text-white/70 font-bold uppercase tracking-[0.18em]">
+          <h1
+            className={`font-black tracking-tight uppercase leading-none ${
+              isRegistering
+                ? "text-[clamp(1.6rem,5.2vw,3.75rem)]"
+                : "text-3xl md:text-4xl"
+            }`}
+          >
+            Sherdor Medical
+          </h1>
+          <p
+            className={`text-white/70 font-bold uppercase tracking-[0.18em] ${
+              isRegistering ? "mt-2 text-[clamp(0.65rem,1.8vw,0.95rem)]" : "mt-2 text-xs md:text-sm"
+            }`}
+          >
             Navbat Boshqaruv Tizimi
           </p>
         </div>
@@ -226,7 +248,11 @@ export default function App() {
         </div>
       </nav>
 
-      <main className="flex-1 max-w-6xl mx-auto w-full p-8">
+      <main
+        className={`flex-1 min-h-0 w-full flex flex-col ${
+          isRegistering ? "max-w-none overflow-hidden" : "max-w-6xl mx-auto p-8"
+        }`}
+      >
         {!patient ? (
           <PatientRegistration apiUrl={API_URL} onRegistered={setPatient} />
         ) : (

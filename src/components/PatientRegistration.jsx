@@ -124,90 +124,100 @@ export default function PatientRegistration({ apiUrl, onRegistered }) {
   const kbMode = focusField === "phone" ? "numeric" : "latin";
 
   return (
-    <div className="w-full max-w-lg mx-auto animate-fade-in flex flex-col min-h-0">
-      <div className="flex-1 overflow-y-auto min-h-0 px-2 pt-2 pb-[clamp(260px,44vh,540px)]">
-        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 sm:p-8 backdrop-blur-sm">
-          <h2 className="text-xl font-black uppercase tracking-tight text-white m-0">Bemor ro&apos;yxatdan o&apos;tishi</h2>
-          <p className="text-xs text-white/50 mt-2 mb-6 font-medium uppercase tracking-widest leading-relaxed">
-            Pastdagi klaviatura bilan kiriting. Telefon: <strong className="text-teal-300/90">+998</strong> avtomatik,
-            faqat keyingi {PHONE_LOCAL_MAX} raqamni bosing.
-          </p>
+    <div className="kiosk-register-root w-full flex-1 min-h-0 flex flex-col animate-fade-in">
+      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-4 sm:px-8 pt-3 pb-[min(52vh,620px)] sm:pb-[min(48vh,580px)] flex flex-col">
+        <div className="my-auto w-full max-w-[min(100%,42rem)] mx-auto">
+          <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-6 sm:p-10 backdrop-blur-sm shadow-[0_24px_80px_rgba(0,0,0,0.45)]">
+            <h2 className="text-[clamp(1.35rem,4.2vw,2.35rem)] font-black uppercase tracking-tight text-white m-0 leading-tight">
+              Bemor ro&apos;yxatdan o&apos;tishi
+            </h2>
+            <p className="text-[clamp(0.75rem,2.1vw,1rem)] text-white/55 mt-3 mb-7 sm:mb-8 font-medium uppercase tracking-[0.12em] leading-relaxed">
+              Pastdagi klaviatura bilan kiriting. Telefon: <strong className="text-teal-300/90">+998</strong> avtomatik,
+              faqat keyingi {PHONE_LOCAL_MAX} raqamni bosing.
+            </p>
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-            <label className="block">
-              <span className="text-[10px] font-black uppercase tracking-widest text-teal-400/90">Ism</span>
-              <input
-                type="text"
-                name="firstName"
-                readOnly
-                inputMode="none"
-                autoComplete="off"
-                value={firstName}
-                onFocus={() => setFocusField("firstName")}
-                className={`mt-1.5 w-full rounded-xl border bg-black/40 px-4 py-3 text-lg text-white placeholder:text-white/25 outline-none cursor-pointer ${fieldRing("firstName")}`}
-                placeholder="Masalan: AZIZ"
-                required
-                minLength={2}
-              />
-            </label>
-            <label className="block">
-              <span className="text-[10px] font-black uppercase tracking-widest text-teal-400/90">Familiya</span>
-              <input
-                type="text"
-                name="lastName"
-                readOnly
-                inputMode="none"
-                autoComplete="off"
-                value={lastName}
-                onFocus={() => setFocusField("lastName")}
-                className={`mt-1.5 w-full rounded-xl border bg-black/40 px-4 py-3 text-lg text-white placeholder:text-white/25 outline-none cursor-pointer ${fieldRing("lastName")}`}
-                placeholder="Masalan: KARIMOV"
-                required
-                minLength={2}
-              />
-            </label>
-            <label className="block">
-              <span className="text-[10px] font-black uppercase tracking-widest text-teal-400/90">Telefon</span>
-              <div
-                className={`mt-1.5 flex rounded-xl border overflow-hidden bg-black/40 ${fieldRing("phone")}`}
-                onMouseDown={(ev) => {
-                  const t = ev.target;
-                  if (t && t.closest && t.closest("input")) return;
-                  ev.preventDefault();
-                  setFocusField("phone");
-                }}
-              >
-                <span className="flex items-center px-3 sm:px-4 bg-teal-500/15 text-teal-200 font-mono font-black text-base sm:text-lg shrink-0 border-r border-white/10">
-                  +998
+            <form onSubmit={handleSubmit} className="flex flex-col gap-5 sm:gap-6">
+              <label className="block">
+                <span className="text-[clamp(0.65rem,1.8vw,0.85rem)] font-black uppercase tracking-[0.2em] text-teal-400/90">
+                  Ism
                 </span>
                 <input
                   type="text"
-                  name="phone"
+                  name="firstName"
                   readOnly
                   inputMode="none"
                   autoComplete="off"
-                  value={phoneDigits}
-                  onFocus={() => setFocusField("phone")}
-                  className="flex-1 min-w-0 border-0 bg-transparent px-3 py-3 text-lg text-white font-mono outline-none cursor-pointer placeholder:text-white/25"
-                  placeholder="901234567"
-                  aria-label="Telefon raqami +998 dan keyin"
+                  value={firstName}
+                  onFocus={() => setFocusField("firstName")}
+                  className={`mt-2 w-full rounded-2xl border bg-black/45 px-4 sm:px-5 py-[clamp(0.85rem,2.8vw,1.35rem)] text-[clamp(1.1rem,3.2vw,1.75rem)] text-white placeholder:text-white/25 outline-none cursor-pointer ${fieldRing("firstName")}`}
+                  placeholder="Masalan: AZIZ"
+                  required
+                  minLength={2}
                 />
-              </div>
-              <p className="text-[10px] text-white/35 mt-1 m-0">
-                {phoneDigits.length}/{PHONE_LOCAL_MAX} raqam
-              </p>
-            </label>
+              </label>
+              <label className="block">
+                <span className="text-[clamp(0.65rem,1.8vw,0.85rem)] font-black uppercase tracking-[0.2em] text-teal-400/90">
+                  Familiya
+                </span>
+                <input
+                  type="text"
+                  name="lastName"
+                  readOnly
+                  inputMode="none"
+                  autoComplete="off"
+                  value={lastName}
+                  onFocus={() => setFocusField("lastName")}
+                  className={`mt-2 w-full rounded-2xl border bg-black/45 px-4 sm:px-5 py-[clamp(0.85rem,2.8vw,1.35rem)] text-[clamp(1.1rem,3.2vw,1.75rem)] text-white placeholder:text-white/25 outline-none cursor-pointer ${fieldRing("lastName")}`}
+                  placeholder="Masalan: KARIMOV"
+                  required
+                  minLength={2}
+                />
+              </label>
+              <label className="block">
+                <span className="text-[clamp(0.65rem,1.8vw,0.85rem)] font-black uppercase tracking-[0.2em] text-teal-400/90">
+                  Telefon
+                </span>
+                <div
+                  className={`mt-2 flex rounded-2xl border overflow-hidden bg-black/45 ${fieldRing("phone")}`}
+                  onMouseDown={(ev) => {
+                    const t = ev.target;
+                    if (t && t.closest && t.closest("input")) return;
+                    ev.preventDefault();
+                    setFocusField("phone");
+                  }}
+                >
+                  <span className="flex items-center px-4 sm:px-5 bg-teal-500/15 text-teal-200 font-mono font-black text-[clamp(1rem,2.8vw,1.5rem)] shrink-0 border-r border-white/10">
+                    +998
+                  </span>
+                  <input
+                    type="text"
+                    name="phone"
+                    readOnly
+                    inputMode="none"
+                    autoComplete="off"
+                    value={phoneDigits}
+                    onFocus={() => setFocusField("phone")}
+                    className="flex-1 min-w-0 border-0 bg-transparent px-4 py-[clamp(0.85rem,2.8vw,1.35rem)] text-[clamp(1.1rem,3.2vw,1.75rem)] text-white font-mono outline-none cursor-pointer placeholder:text-white/25"
+                    placeholder="901234567"
+                    aria-label="Telefon raqami +998 dan keyin"
+                  />
+                </div>
+                <p className="text-[clamp(0.65rem,1.6vw,0.8rem)] text-white/40 mt-2 m-0">
+                  {phoneDigits.length}/{PHONE_LOCAL_MAX} raqam
+                </p>
+              </label>
 
-            {error ? <p className="text-sm text-red-400 m-0">{error}</p> : null}
+              {error ? <p className="text-[clamp(0.9rem,2.2vw,1.1rem)] text-red-400 m-0">{error}</p> : null}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="mt-2 w-full rounded-xl bg-teal-500 py-4 text-sm font-black uppercase tracking-widest text-black hover:bg-teal-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? "Saqlanmoqda..." : "Davom etish"}
-            </button>
-          </form>
+              <button
+                type="submit"
+                disabled={loading}
+                className="mt-1 w-full rounded-2xl bg-teal-500 py-[clamp(1rem,3vw,1.35rem)] text-[clamp(0.95rem,2.4vw,1.15rem)] font-black uppercase tracking-[0.15em] text-black hover:bg-teal-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[3.25rem]"
+              >
+                {loading ? "Saqlanmoqda..." : "Davom etish"}
+              </button>
+            </form>
+          </div>
         </div>
       </div>
 
