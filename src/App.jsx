@@ -1,11 +1,16 @@
 import { useCallback, useEffect, useState } from "react";
 import { getNavbatApiBase } from "./apiBase.js";
+import PatientRegistration, {
+  clearKioskPatientSession,
+  readKioskPatientSession
+} from "./components/PatientRegistration.jsx";
 import ServiceList from "./components/ServiceList";
 import Ticket from "./components/Ticket";
 
 const API_URL = getNavbatApiBase();
 
 export default function App() {
+  const [patient, setPatient] = useState(() => readKioskPatientSession());
   const [view, setView] = useState("selection");
   const [services, setServices] = useState([]);
   const [queueSnapshot, setQueueSnapshot] = useState([]);
@@ -14,7 +19,7 @@ export default function App() {
   const [previewNumber, setPreviewNumber] = useState(null);
   const [previewSection, setPreviewSection] = useState("");
 
-  const fetchServices = async () => {
+  const fetchServices = useCallback(async () => {
     try {
       const response = await fetch(`${API_URL}/services`, { cache: "no-store" });
       if (!response.ok) return;
@@ -23,9 +28,9 @@ export default function App() {
     } catch (_error) {
       /* ignore */
     }
-  };
+  }, []);
 
-  const fetchQueueSnapshot = async () => {
+  const fetchQueueSnapshot = useCallback(async () => {
     try {
       const response = await fetch(`${API_URL}/queues`, { cache: "no-store" });
       if (!response.ok) return;
@@ -34,22 +39,33 @@ export default function App() {
     } catch (_error) {
       /* ignore */
     }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchServices();
-    fetchQueueSnapshot();
+    if (!patient) return undefined;
+
+    void fetchServices();
+    void fetchQueueSnapshot();
+
+    const pollTimer = setInterval(() => {
+      void fetchServices();
+      void fetchQueueSnapshot();
+    }, 1000);
+
     const events = new EventSource(`${API_URL}/events`);
     events.addEventListener("state-updated", () => {
-      fetchServices();
-      fetchQueueSnapshot();
+      void fetchServices();
+      void fetchQueueSnapshot();
     });
     events.onerror = () => {
-      fetchServices();
-      fetchQueueSnapshot();
+      void fetchServices();
+      void fetchQueueSnapshot();
     };
-    return () => events.close();
-  }, []);
+    return () => {
+      clearInterval(pollTimer);
+      events.close();
+    };
+  }, [patient, fetchServices, fetchQueueSnapshot]);
 
   useEffect(() => {
     if (!selectedServiceId) return;
@@ -65,10 +81,18 @@ export default function App() {
 
   /** Faqat navbat yaratish — chop etish alohida, fonda */
   const postTicket = useCallback(async (serviceId) => {
+    if (!patient) {
+      return { ok: false, message: "Bemor ma'lumoti topilmadi", ticket: null };
+    }
     const ticketRes = await fetch(`${API_URL}/tickets`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ serviceId })
+      body: JSON.stringify({
+        serviceId,
+        patientFirstName: patient.firstName,
+        patientLastName: patient.lastName,
+        patientPhone: patient.phone
+      })
     });
     if (!ticketRes.ok) {
       let msg = "Navbat band qilishda xatolik";
@@ -82,7 +106,7 @@ export default function App() {
     }
     const ticket = await ticketRes.json();
     return { ok: true, ticket };
-  }, []);
+  }, [patient]);
 
   const printTicketInBackground = useCallback((ticket) => {
     void fetch(`${API_URL}/printer/print-ticket`, {
@@ -140,13 +164,7 @@ export default function App() {
         printTicketInBackground(ticketToPrint);
       }
 
-      setPreviewNumber(Number(ticketToPrint.departmentNumber ?? 0) + 1);
-      setPreviewSection(ticketToPrint.section || "");
-      setSelectedServiceId("");
-      setCurrentTicket(null);
-      setView("selection");
-      fetchServices();
-      fetchQueueSnapshot();
+      resetPatientAndGoRegister();
       return {
         ok: true,
         message: "Navbat olindi",
@@ -157,9 +175,19 @@ export default function App() {
     }
   };
 
+  const resetPatientAndGoRegister = () => {
+    clearKioskPatientSession();
+    setPatient(null);
+    setView("selection");
+    setSelectedServiceId("");
+    setCurrentTicket(null);
+    setPreviewNumber(null);
+    setPreviewSection("");
+  };
+
   return (
     <div className="min-h-screen bg-[#0A0A0B] text-white font-sans flex flex-col">
-      <nav className="border-b border-white/10 px-8 py-6 flex justify-between items-center sticky top-0 z-50 bg-[#0A0A0B]/80 backdrop-blur-md">
+      <nav className="border-b border-white/10 px-8 py-6 flex justify-between items-center sticky top-0 z-50 bg-[#0A0A0B]/80 backdrop-blur-md gap-4 flex-wrap">
         <div>
           <h1 className="text-3xl md:text-4xl font-black tracking-tight uppercase leading-none">Sherdor Medical</h1>
           <p className="mt-2 text-xs md:text-sm text-white/70 font-bold uppercase tracking-[0.18em]">
@@ -167,43 +195,71 @@ export default function App() {
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => {
-            setView("selection");
-          }}
-          className="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all bg-teal-500 text-black"
-        >
-          Xizmatlar
-        </button>
+        <div className="flex flex-wrap items-center gap-2 justify-end">
+          {patient ? (
+            <>
+              <div className="text-right hidden sm:block mr-2">
+                <p className="text-[10px] uppercase tracking-widest text-white/40 m-0">Bemor</p>
+                <p className="text-xs font-bold text-white/90 m-0">
+                  {patient.firstName} {patient.lastName}
+                </p>
+                <p className="text-[11px] font-mono text-teal-400/90 m-0">{patient.phone}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setView("selection");
+                }}
+                className="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all bg-teal-500 text-black"
+              >
+                Xizmatlar
+              </button>
+              <button
+                type="button"
+                onClick={resetPatientAndGoRegister}
+                className="px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider border border-white/15 text-white/70 hover:bg-white/5"
+              >
+                Bemorni almashtirish
+              </button>
+            </>
+          ) : null}
+        </div>
       </nav>
 
       <main className="flex-1 max-w-6xl mx-auto w-full p-8">
-        {view === "selection" && (
-          <ServiceList
-            services={services}
-            queueSnapshot={queueSnapshot}
-            onSelect={handleSelectService}
-          />
-        )}
-        {view === "ticket" && currentTicket && (
-          <Ticket
-            ticket={currentTicket}
-            onBack={() => setView("selection")}
-            onPrint={handlePrintTicket}
-            previewNumber={previewNumber}
-            previewSection={previewSection}
-          />
-        )}
-        {view === "ticket" && !currentTicket && (
-          <Ticket
-            ticket={null}
-            service={services.find((item) => item.id === selectedServiceId) || null}
-            onBack={() => setView("selection")}
-            onPrint={handlePrintTicket}
-            previewNumber={previewNumber}
-            previewSection={previewSection}
-          />
+        {!patient ? (
+          <PatientRegistration apiUrl={API_URL} onRegistered={setPatient} />
+        ) : (
+          <>
+            {view === "selection" && (
+              <ServiceList
+                services={services}
+                queueSnapshot={queueSnapshot}
+                onSelect={handleSelectService}
+              />
+            )}
+            {view === "ticket" && currentTicket && (
+              <Ticket
+                ticket={currentTicket}
+                patient={patient}
+                onBack={() => setView("selection")}
+                onPrint={handlePrintTicket}
+                previewNumber={previewNumber}
+                previewSection={previewSection}
+              />
+            )}
+            {view === "ticket" && !currentTicket && (
+              <Ticket
+                ticket={null}
+                patient={patient}
+                service={services.find((item) => item.id === selectedServiceId) || null}
+                onBack={() => setView("selection")}
+                onPrint={handlePrintTicket}
+                previewNumber={previewNumber}
+                previewSection={previewSection}
+              />
+            )}
+          </>
         )}
       </main>
     </div>

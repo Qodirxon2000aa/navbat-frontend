@@ -6,6 +6,13 @@
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 }
 
+html,
+body {
+  touch-action: manipulation;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 body {
   @apply bg-[#0A0A0B] text-white selection:bg-teal-500/30 font-sans;
 }
@@ -36,4 +43,25 @@ body {
 
 .animate-fade-in {
   animation: fadeIn 0.4s ease-out forwards;
+}
+
+/* Kiosk sensor klaviatura — vertikal / katta ekranga mos */
+.touch-kb-key {
+  min-height: clamp(48px, 7.5vh, 88px);
+  font-size: clamp(16px, 2.4vh, 28px);
+  line-height: 1;
+  padding: 0.35rem 0.25rem;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.touch-kb-key--wide {
+  min-height: clamp(48px, 7.5vh, 88px);
+  font-size: clamp(20px, 3vh, 34px);
+}
+
+.touch-kb-key--space {
+  min-height: clamp(48px, 7.5vh, 88px);
+  font-size: clamp(12px, 1.6vh, 18px);
+  grid-column: span 2;
 }

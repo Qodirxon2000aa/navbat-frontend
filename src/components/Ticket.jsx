@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 
 export default function Ticket({
   ticket,
+  patient,
   service,
   onBack,
   onPrint,
@@ -53,6 +54,11 @@ export default function Ticket({
   const doctorPhone = ticket?.doctorPhone ?? service?.doctorPhone ?? "";
   const roomNumber = (ticket?.roomNumber ?? service?.roomNumber ?? "").trim();
 
+  const patientFirst = ticket?.patientFirstName ?? patient?.firstName ?? "";
+  const patientLast = ticket?.patientLastName ?? patient?.lastName ?? "";
+  const patientFull = [patientFirst, patientLast].filter(Boolean).join(" ").trim();
+  const patientPhone = ticket?.patientPhone ?? patient?.phone ?? "";
+
   const createdAt = ticket ? new Date(ticket.createdAt) : null;
   const dateStr = createdAt
     ? createdAt.toLocaleDateString("uz-UZ", { day: "2-digit", month: "2-digit", year: "numeric" })
@@ -102,6 +108,22 @@ export default function Ticket({
           <div className="w-full border-t border-dashed border-black/20 my-3" />
         )}
 
+        {(patientFull || patientPhone) && (
+          <div className="w-full flex flex-col items-center gap-1 mb-1">
+            <p className="text-[9px] tracking-[0.12em] text-black/40 m-0 uppercase">Bemor</p>
+            {patientFull ? (
+              <p className="text-[11px] font-bold text-black m-0 leading-tight">{patientFull}</p>
+            ) : null}
+            {patientPhone ? (
+              <p className="text-[10px] font-mono text-black/70 m-0">{patientPhone}</p>
+            ) : null}
+          </div>
+        )}
+
+        {(patientFull || patientPhone) && (
+          <div className="w-full border-t border-dashed border-black/20 my-3" />
+        )}
+
         {/* Navbat raqami — katta */}
         <p className="text-[9px] tracking-[0.15em] text-black/40 m-0 uppercase">
           Navbat raqami
@@ -144,6 +166,24 @@ export default function Ticket({
               <td className="text-left text-black/40 py-[3px] pr-2">Vaqt</td>
               <td className="text-right py-[3px]">{timeStr}</td>
             </tr>
+            {(patientFirst || patientLast || patientPhone) && (
+              <>
+                <tr style={{ borderTop: "1px dashed rgba(0,0,0,0.12)" }}>
+                  <td className="text-left text-black/40 py-[3px] pr-2">Ism</td>
+                  <td className="text-right font-semibold py-[3px]">{patientFirst || "—"}</td>
+                </tr>
+                <tr>
+                  <td className="text-left text-black/40 py-[3px] pr-2">Familiya</td>
+                  <td className="text-right font-semibold py-[3px]">{patientLast || "—"}</td>
+                </tr>
+                {patientPhone ? (
+                  <tr>
+                    <td className="text-left text-black/40 py-[3px] pr-2">Telefon</td>
+                    <td className="text-right font-mono py-[3px]">{patientPhone}</td>
+                  </tr>
+                ) : null}
+              </>
+            )}
             <tr style={{ borderTop: "1px dashed rgba(0,0,0,0.12)" }}>
               <td className="text-left font-bold text-black/80 pt-2 pb-1 pr-2">To'lov</td>
               <td className="text-right font-black pt-2 pb-1">{price} so'm</td>
